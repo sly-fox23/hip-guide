@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b3f3a">
+<script>
+/* Register the guide's own service worker (sw.js, shipped at the site
+   root alongside this page) with scope './', so the worker's scope covers
+   the page itself and the browser treats the guide as the installable app.
+   Fall back to the worker's default scope so registration still succeeds
+   if the explicit scope is rejected. */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js',{scope:'./'}).catch(function(){
+      return navigator.serviceWorker.register('sw.js');
+    }).catch(function(){});
+  });
+}
+</script>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hip Mobility">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" type="image/png" sizes="192x192" href="data:image/png;base64,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">
+<title>8-Week Hip Mobility & Pelvic Floor Guide</title>
+<style>
+*{box-sizing:border-box} body{font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;
+margin:0;background:#f4f7f7;color:#1f2a2a;line-height:1.45}
+.wrap{max-width:680px;margin:0 auto;padding:0 14px 60px}
+header.hero{background:#0f766e;color:#fff;padding:26px 18px;border-radius:0 0 18px 18px}
+header.hero h1{margin:0 0 6px;font-size:24px} header.hero p{margin:4px 0;opacity:.94}
+nav.days{position:sticky;top:0;z-index:5;background:#f4f7f7cc;backdrop-filter:blur(6px);
+padding:10px 0;display:flex;gap:8px;overflow-x:auto}
+nav.days a{flex:0 0 auto;background:#0f766e;color:#fff;text-decoration:none;font-weight:700;
+padding:8px 14px;border-radius:999px;font-size:14px}
+.rule{background:#fff;border-radius:14px;padding:14px 16px;margin:14px 0;box-shadow:0 1px 4px #0001}
+.rule h2{font-size:17px;margin:0 0 8px} .rule li{margin:6px 0}
+.day{margin:26px 0} .day h2{font-size:20px;margin:0 0 2px}
+.focus{color:#4b5a5a;margin:0 0 12px}
+.ex{background:#fff;border-radius:14px;overflow:hidden;margin:12px 0;box-shadow:0 1px 4px #0001}
+
+.video-demo{position:relative;width:100%;aspect-ratio:16/9;background:#071111;overflow:hidden;color:#d8eeee}
+.video-demo iframe,.video-player{position:absolute;inset:0;width:100%;height:100%;border:0}
+.video-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px;text-align:center;background:#071111;color:#d8eeee;font-size:13px;font-weight:700;z-index:1}
+.video-placeholder::before{content:"";width:0;height:0;border-top:14px solid transparent;border-bottom:14px solid transparent;border-left:22px solid #5eead4;filter:drop-shadow(0 2px 4px #0008)}
+.video-placeholder a{color:#5eead4;text-decoration-thickness:1px;text-underline-offset:3px}
+.video-demo.is-ready .video-placeholder{display:none}
+.video-tap{position:absolute;inset:0;z-index:3;display:flex;align-items:flex-end;justify-content:center;padding:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.video-tap span{background:rgba(0,0,0,.55);color:#fff;font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;transition:opacity .6s ease;pointer-events:none}
+.video-tap:focus-visible{outline:3px solid #5eead4;outline-offset:-3px}
+.video-tap:focus-visible span{opacity:1}
+.video-tap.is-faded span{opacity:0}
+.exbody{padding:12px 14px 14px} .extop{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.extop h3{margin:0;font-size:16px} .tag{font-size:11px;font-weight:700;background:#ccfbf1;color:#0f766e;
+padding:3px 10px;border-radius:999px;white-space:nowrap}
+.dose{font-weight:700;color:#0f766e;margin:8px 0 4px} .cue{margin:4px 0}
+.tilt{margin:8px 0 0;font-size:13.5px;color:#4b5a5a;background:#f0fdfa;padding:8px 10px;border-radius:8px}
+.pficon{background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;text-align:center;padding:26px 0}
+.pficon span{display:block;font-weight:800;font-size:22px} .pficon em{font-style:normal;opacity:.85}
+.pf-group{margin:18px 0 22px}
+.pf-group-intro{background:var(--soft);border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);border-radius:14px;padding:14px 16px;margin:0 0 12px}
+.pf-group-intro h3{font-size:18px;margin:0 0 7px}.pf-group-intro p{margin:6px 0}.pf-group-safety{color:var(--muted);font-size:13.5px}
+.safety{background:#fff7ed;border:1px solid #fdba74;border-radius:14px;padding:14px 16px;margin-top:22px}
+footer{text-align:center;color:#7a8a8a;font-size:12.5px;margin:26px 0}
+/* Mobile-first workout controls */
+html{scroll-behavior:smooth}
+body{font-size:15px;overflow-x:hidden}
+button{-webkit-tap-highlight-color:transparent}
+nav.days{box-sizing:border-box;margin-left:-14px;margin-right:-14px;padding:10px 14px;max-width:none;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+nav.days::-webkit-scrollbar{display:none}
+nav.days a{min-height:44px;display:inline-flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.day{scroll-margin-top:76px}
+.ex{width:100%}
+.extop{align-items:flex-start;flex-wrap:wrap}
+.extop h3{font-size:17px;line-height:1.3}
+.timer-widget{margin-top:12px;padding:12px;background:#e6fffa;border-radius:10px;color:#134e4a}
+.timer-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;font-size:13px;font-weight:700}
+.timer-readout{font-variant-numeric:tabular-nums;font-size:34px;line-height:1;font-weight:800;letter-spacing:.02em;color:#0f766e}
+.timer-status{min-height:18px;margin:7px 0 0;font-size:13px;color:#3f5f5c}
+.timer-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(88px,.55fr);gap:8px;margin-top:10px}
+.timer-btn{min-height:44px;border:0;border-radius:9px;padding:9px 12px;font:inherit;font-weight:800;cursor:pointer;touch-action:manipulation}
+.timer-btn:focus-visible{outline:3px solid #0d9488;outline-offset:2px}
+.timer-primary{background:#0f766e;color:#fff}
+.timer-reset{background:#fff;color:#0f766e;border:1px solid #99d8d2}
+.timer-rep{width:100%;min-height:58px;font-size:20px}
+.timer-btn[disabled]{opacity:.62;cursor:default}
+@media(max-width:420px){
+  .wrap{padding-left:12px;padding-right:12px}
+  nav.days{margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px}
+  header.hero{padding:22px 16px}
+  header.hero h1{font-size:23px;line-height:1.2}
+  .exbody{padding:12px}
+  .timer-controls{grid-template-columns:minmax(0,1fr) 86px}
+}
+/* One-day view navigation and narrow-screen containment */
+nav.days::after{content:"";flex:0 0 6px}
+nav.days a[aria-current="page"]{background:var(--accent);color:#062b28;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--accent) 78%,#fff)}
+.day[hidden]{display:none!important}
+.day,.ex,.exbody,.timer-widget,.timer-controls,.extop{min-width:0;max-width:100%}
+.video-demo,.video-demo iframe,.video-player{max-width:100%}
+.day-switcher{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:18px 0 2px}
+.day-switcher button{min-width:0;min-height:44px;border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);border-radius:10px;background:var(--reset);color:var(--accent);font:inherit;font-weight:800;padding:10px 12px;cursor:pointer;touch-action:manipulation}
+.day-switcher button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.day-switcher button:disabled{opacity:.42;cursor:default}
+@media(max-width:420px){
+  nav.days{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;overflow:visible}
+  nav.days::after{display:none}
+  nav.days a{width:100%;min-width:0;padding-left:6px;padding-right:6px}
+  .timer-widget{padding:10px}
+  .timer-meta{gap:6px;flex-wrap:wrap}
+  .timer-readout{font-size:31px}
+  .timer-controls,.timer-controls[style]{grid-template-columns:minmax(0,1fr) 80px!important}
+  .timer-btn{padding-left:8px;padding-right:8px}
+  .cue,.tilt,.timer-status{overflow-wrap:anywhere}
+}
+@supports not (background:color-mix(in srgb,black,white)){
+  nav.days a[aria-current="page"]{background:#2dd4bf;color:#062b28}
+  .day-switcher button{border-color:var(--accent)}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+/* Dark is the default; the header control switches to the original light palette. */
+:root{
+  color-scheme:dark;
+  --page:#0d1515;--card:#182222;--text:#e9f2f2;--muted:#9fb4b4;--accent:#2dd4bf;
+  --accent-deep:#0f766e;--line:rgba(255,255,255,.06);--soft:rgba(45,212,191,.08);
+  --tag-bg:rgba(45,212,191,.15);--tag-text:#5eead4;--reset:#20302f;--safety:#2b2115;--safety-line:#9a642a;
+}
+html.light{
+  color-scheme:light;
+  --page:#f4f7f7;--card:#fff;--text:#1f2a2a;--muted:#4b5a5a;--accent:#0f766e;
+  --accent-deep:#0f766e;--line:rgba(0,0,0,.06);--soft:#e6fffa;
+  --tag-bg:#ccfbf1;--tag-text:#0f766e;--reset:#fff;--safety:#fff7ed;--safety-line:#fdba74;
+}
+body{background:var(--page);color:var(--text)}
+header.hero{position:relative;background:linear-gradient(135deg,#0b3f3a,#0f766e);color:#fff}
+header.hero .wrap{position:relative;padding-right:76px!important}
+.theme-toggle{position:absolute;right:0;top:0;min-width:64px;min-height:44px;border:1px solid rgba(255,255,255,.35);border-radius:10px;background:rgba(0,0,0,.16);color:#fff;font:inherit;font-size:13px;font-weight:800;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.theme-toggle:focus-visible{outline:3px solid #99f6e4;outline-offset:2px}
+nav.days{background:color-mix(in srgb,var(--page) 88%,transparent)}
+nav.days a,.timer-primary{background:var(--accent-deep);color:#fff}
+.rule,.ex{background:var(--card);border:1px solid var(--line);box-shadow:0 1px 4px #0003}
+.focus,.tilt{color:var(--muted)}
+.tilt{background:var(--soft)}
+.tag{background:var(--tag-bg);color:var(--tag-text)}
+.dose{color:var(--accent)}
+.timer-widget{background:var(--soft);border:1px solid var(--accent);color:var(--text)}
+.timer-readout{color:var(--accent)}
+.timer-status{color:var(--muted)}
+.timer-reset{background:var(--reset);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
+.safety{background:var(--safety);border-color:var(--safety-line)}
+footer{color:var(--muted)}
+html.light header.hero{background:#0f766e}
+@supports not (background:color-mix(in srgb,black,white)){nav.days{background:var(--page)}.timer-reset{border-color:var(--accent)}}
+/* Eight-week progression controls */
+.week-picker{display:flex;gap:7px;margin:2px 0 0;padding:2px 0 4px;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.week-picker::-webkit-scrollbar{display:none}
+.week-picker button{flex:1 0 58px;min-height:44px;border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);border-radius:999px;background:var(--reset);color:var(--accent);font:inherit;font-size:13px;font-weight:800;padding:8px 9px;cursor:pointer;touch-action:manipulation}
+.week-picker button[aria-pressed="true"]{background:var(--accent);color:#062b28;border-color:var(--accent)}
+.week-picker button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.progression-note{margin:7px 2px 16px;color:var(--muted);font-size:13px}
+.cardio-icon{display:flex;align-items:center;justify-content:center;min-height:116px;background:linear-gradient(135deg,#123d39,#0f766e);color:#99f6e4}
+.cardio-icon svg{width:72px;height:72px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.cardio-note{margin:8px 0 0;color:var(--muted);font-size:13.5px}
+@media(max-width:420px){
+  .week-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;overflow:visible}
+  .week-picker button{min-width:0;width:100%;padding-left:5px;padding-right:5px}
+}
+@supports not (background:color-mix(in srgb,black,white)){.week-picker button{border-color:var(--accent)}}
+/* Stacked program navigation and in-session completion */
+.selector-stack{position:sticky;top:0;z-index:5;margin-left:-14px;margin-right:-14px;padding:8px 14px 10px;background:color-mix(in srgb,var(--page) 88%,transparent);backdrop-filter:blur(6px)}
+.selector-stack .week-picker{margin:0;padding:0 0 4px}
+.selector-stack nav.days{position:static;z-index:auto;margin:0;padding:4px 0 0;background:transparent;backdrop-filter:none}
+nav.days a.is-complete{opacity:.5;filter:saturate(.2)}
+nav.days a.is-complete[aria-current="page"]{opacity:.68}
+.day-completion{display:block;width:100%;min-height:48px;margin:16px 0 6px;border:1px solid color-mix(in srgb,var(--accent) 60%,transparent);border-radius:10px;background:var(--accent-deep);color:#fff;font:inherit;font-weight:800;padding:11px 14px;cursor:pointer;touch-action:manipulation}
+.day-completion.is-done{background:var(--reset);color:var(--muted);border-color:var(--line)}
+.day-completion:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media(max-width:420px){
+  .selector-stack{margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px}
+}
+@supports not (background:color-mix(in srgb,black,white)){
+  .selector-stack{background:var(--page)}
+  .day-completion{border-color:var(--accent)}
+}
+</style></head><body>
+<header class="hero"><div class="wrap" style="padding:0">
+<button class="theme-toggle" type="button" aria-label="Switch to light theme" aria-pressed="false">Light</button>
+<h1>8-Week Hip Mobility &amp; Pelvic Floor Guide</h1>
+<p>Hips tipping forward, tight groin, weak pelvic floor — one short session a day.</p>
+<p><b>~22–39 min/day, plus cardio.</b> Complete each week in order.</p>
+</div></header>
+<div class="wrap">
+<div class="selector-stack">
+<div class="week-picker" role="group" aria-label="Choose program week"><button type="button" aria-pressed="true">W1</button><button type="button" aria-pressed="false">W2</button><button type="button" aria-pressed="false">W3</button><button type="button" aria-pressed="false">W4</button><button type="button" aria-pressed="false">W5</button><button type="button" aria-pressed="false">W6</button><button type="button" aria-pressed="false">W7</button><button type="button" aria-pressed="false">W8</button></div>
+<nav class="days" aria-label="Choose workout day"><a href="#d1" aria-current="page">D1</a><a href="#d2">D2</a><a href="#d3">D3</a><a href="#d4">D4</a><a href="#d5">D5</a><a href="#d6">D6</a><a href="#d7">D7</a></nav>
+</div>
+<p class="progression-note">Each week builds on the last — finish all 7 days, then move to the next week.</p>
+<div class="rule"><h2>The 3 rules for hips that tilt forward</h2>
+<ul>
+<li><b>Stretch the front:</b> hip flexors are usually the tightest link — that's the half-kneeling stretch.</li>
+<li><b>Strengthen the back:</b> glutes + deep core pull the pelvis level — bridges, kickbacks, dead bugs, planks.</li>
+<li><b>Move from neutral:</b> in every exercise, tuck the tailbone slightly and keep ribs down — no overarching the lower back.</li>
+</ul></div>
+<div class="rule"><h2>Daily pelvic floor block (Mojo-style)</h2>
+<p style="margin:0">Every day includes the full set: <b>pulses</b> for strength, <b>holds</b> for endurance, and <b>reverse kegels</b> for release. The doses progress with W1–W8, while the day's hip openers and deep breathing cover relaxation.</p></div>
+<section class="day" id="d1">
+      <h2>Day 1 — Reset & Realign</h2><p class="focus">Learn neutral pelvis; gentle full-body reset. ~22–30 min before cardio, depending on week.</p><article class="ex">
+      <div class="video-demo" data-video-id="9jpchJcKivk" data-video-title="Diaphragm Breathing" aria-label="Diaphragm Breathing demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Diaphragm Breathing</h3><span class="tag">Mojo</span></div>
+        <p class="dose">2 min</p>
+        <p class="cue">Inhale: belly rises, pelvic floor drops. Exhale: let it all relax. On every inhale, feel your pelvic floor drop and relax.</p>
+        <p class="tilt"><b>Why:</b> Calms tight pelvic floor and hip flexors before strengthening.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="LIVJZZyZ2qM" data-video-title="Cat-Cow" aria-label="Cat-Cow demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Cat-Cow</h3><span class="tag">Mobility</span></div>
+        <p class="dose">8 slow reps</p>
+        <p class="cue">Move with your breath; don't force the end ranges.</p>
+        <p class="tilt"><b>Why:</b> Teaches your pelvis to tilt both ways so you can find neutral.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="fCC2KpIutFs" data-video-title="Glute Bridge" aria-label="Glute Bridge demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Glute Bridge</h3><span class="tag">Strength</span></div>
+        <p class="dose">2–3 × 10–12, 2-sec hold</p>
+        <p class="cue">Exhale, squeeze glutes, tuck tailbone slightly at the top.</p>
+        <p class="tilt"><b>Why:</b> Key move: strong glutes pull the pelvis out of a forward tilt.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="5qah1cTaJCk" data-video-title="Dead Bug" aria-label="Dead Bug demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Dead Bug</h3><span class="tag">Core</span></div>
+        <p class="dose">2 × 6–8 / side</p>
+        <p class="cue">Press your lower back into the floor; exhale as you extend.</p>
+        <p class="tilt"><b>Why:</b> Trains deep core to hold the pelvis neutral instead of tipping forward.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="2uW-9KD5XOM" data-video-title="90/90 Hip Switches" aria-label="90/90 Hip Switches demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>90/90 Hip Switches</h3><span class="tag">Mobility</span></div>
+        <p class="dose">2 × 5–6 / side</p>
+        <p class="cue">Slow and controlled; keep your chest tall.</p>
+        <p class="tilt"><b>Why:</b> Opens internal and external hip rotation evenly.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="60htZqOg3pE" data-video-title="Frog Stretch" aria-label="Frog Stretch demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Frog Stretch</h3><span class="tag">Groin</span></div>
+        <p class="dose">2 × 45–60 sec</p>
+        <p class="cue">Knees wide, rock gently; mild stretch only, never sharp.</p>
+        <p class="tilt"><b>Why:</b> Releases inner-thigh and groin tightness that tugs the pelvis forward.</p>
+      </div>
+    </article><article class="ex">
+      <div class="pficon"><span>Mojo</span><em>pelvic<br>floor</em></div>
+      <div class="exbody">
+        <div class="extop"><h3>Kegel Pulses — strength (Mojo)</h3><span class="tag">Mojo</span></div>
+        <p class="dose">1-sec squeeze, 1-sec release × 10, 2 sets</p>
+        <p class="cue">Squeeze like stopping gas; breathe normally, don't clench glutes or abs.</p>
+        
+      </div>
+    </article>
+    </section><section class="day" id="d2" hidden>
+      <h2>Day 2 — Build the Glutes</h2><p class="focus">Strength day: glutes do the correcting. ~22–28 min before cardio, depending on week.</p><article class="ex">
+      <div class="video-demo" data-video-id="fCC2KpIutFs" data-video-title="Glute Bridge" aria-label="Glute Bridge demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Glute Bridge</h3><span class="tag">Strength</span></div>
+        <p class="dose">2–3 × 10–12, 2-sec hold</p>
+        <p class="cue">Exhale, squeeze glutes, tuck tailbone slightly at the top.</p>
+        <p class="tilt"><b>Why:</b> Key move: strong glutes pull the pelvis out of a forward tilt.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="qc10y4MWpTM" data-video-title="Glute Kickback" aria-label="Glute Kickback demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Glute Kickback</h3><span class="tag">Strength</span></div>
+        <p class="dose">2 × 10 / side</p>
+        <p class="cue">Squeeze the glute to lift; don't arch your lower back.</p>
+        <p class="tilt"><b>Why:</b> Builds glute strength without extending the spine.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="xrPteyQLGAo" data-video-title="Reverse Lunge" aria-label="Reverse Lunge demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Reverse Lunge</h3><span class="tag">Strength</span></div>
+        <p class="dose">2 × 8 / side</p>
+        <p class="cue">Torso tall; tuck the pelvis under slightly at the bottom.</p>
+        <p class="tilt"><b>Why:</b> Strengthens glutes and quads while stretching the back-leg hip flexor.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="B1gwnw5r2JI" data-video-title="Bird Dog" aria-label="Bird Dog demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Bird Dog</h3><span class="tag">Core</span></div>
+        <p class="dose">2 × 6–8 / side</p>
+        <p class="cue">Hips level, reach long; brace your core lightly.</p>
+        <p class="tilt"><b>Why:</b> Glute + core coordination for a stable pelvis.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="ccRw3WL1u3U" data-video-title="Half-Kneeling Hip Flexor Stretch" aria-label="Half-Kneeling Hip Flexor Stretch demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Half-Kneeling Hip Flexor Stretch</h3><span class="tag">Stretch</span></div>
+        <p class="dose">2 × 40 sec / side</p>
+        <p class="cue">Tuck tailbone, ribs down; gently squeeze the back-side glute.</p>
+        <p class="tilt"><b>Why:</b> The priority stretch: tight hip flexors are the main driver of forward pelvic tilt.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="sQ1CuSFp14A" data-video-title="Butterfly" aria-label="Butterfly demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Butterfly</h3><span class="tag">Groin</span></div>
+        <p class="dose">2 × 45 sec</p>
+        <p class="cue">Sit tall; ease the knees down, no bouncing.</p>
+        <p class="tilt"><b>Why:</b> Opens the groin while you practice sitting tall instead of slouching.</p>
+      </div>
+    </article><article class="ex">
+      <div class="pficon"><span>Mojo</span><em>pelvic<br>floor</em></div>
+      <div class="exbody">
+        <div class="extop"><h3>Kegel Holds — endurance (Mojo)</h3><span class="tag">Mojo</span></div>
+        <p class="dose">5-sec squeeze, 5-sec relax × 8–10, 2 sets</p>
+        <p class="cue">Build up to 10-sec holds over weeks.</p>
+        
+      </div>
+    </article>
+    </section><section class="day" id="d3" hidden>
+      <h2>Day 3 — Hip Mobility Flow</h2><p class="focus">Open hips and groin; easy pace. ~24–32 min before cardio, depending on week.</p><article class="ex">
+      <div class="video-demo" data-video-id="9jpchJcKivk" data-video-title="Diaphragm Breathing" aria-label="Diaphragm Breathing demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Diaphragm Breathing</h3><span class="tag">Mojo</span></div>
+        <p class="dose">2 min</p>
+        <p class="cue">Inhale: belly rises, pelvic floor drops. Exhale: let it all relax. On every inhale, feel your pelvic floor drop and relax.</p>
+        <p class="tilt"><b>Why:</b> Calms tight pelvic floor and hip flexors before strengthening.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="2uW-9KD5XOM" data-video-title="90/90 Hip Switches" aria-label="90/90 Hip Switches demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>90/90 Hip Switches</h3><span class="tag">Mobility</span></div>
+        <p class="dose">2 × 5–6 / side</p>
+        <p class="cue">Slow and controlled; keep your chest tall.</p>
+        <p class="tilt"><b>Why:</b> Opens internal and external hip rotation evenly.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="60htZqOg3pE" data-video-title="Frog Stretch" aria-label="Frog Stretch demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Frog Stretch</h3><span class="tag">Groin</span></div>
+        <p class="dose">2 × 45–60 sec</p>
+        <p class="cue">Knees wide, rock gently; mild stretch only, never sharp.</p>
+        <p class="tilt"><b>Why:</b> Releases inner-thigh and groin tightness that tugs the pelvis forward.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="l83R5PblSMA" data-video-title="Deep Squat Hold" aria-label="Deep Squat Hold demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Deep Squat Hold</h3><span class="tag">Mobility</span></div>
+        <p class="dose">3 × 30–45 sec</p>
+        <p class="cue">Heels down if possible; chest up, knees track over toes. Use your elbows to gently press your knees open.</p>
+        <p class="tilt"><b>Why:</b> Full hip and ankle mobility with an upright torso.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="LIVJZZyZ2qM" data-video-title="Cat-Cow" aria-label="Cat-Cow demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Cat-Cow</h3><span class="tag">Mobility</span></div>
+        <p class="dose">8 slow reps</p>
+        <p class="cue">Move with your breath; don't force the end ranges.</p>
+        <p class="tilt"><b>Why:</b> Teaches your pelvis to tilt both ways so you can find neutral.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="26RaPD6Zf44" data-video-title="Happy Baby" aria-label="Happy Baby demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Happy Baby</h3><span class="tag">Mojo</span></div>
+        <p class="dose">2 × 45 sec</p>
+        <p class="cue">Breathe into the stretch; rock gently side to side.</p>
+        <p class="tilt"><b>Why:</b> Mojo's pelvic-floor stretch: releases a tight pelvic floor.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="sQ1CuSFp14A" data-video-title="Butterfly" aria-label="Butterfly demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Butterfly</h3><span class="tag">Groin</span></div>
+        <p class="dose">2 × 45 sec</p>
+        <p class="cue">Sit tall; ease the knees down, no bouncing.</p>
+        <p class="tilt"><b>Why:</b> Opens the groin while you practice sitting tall instead of slouching.</p>
+      </div>
+    </article><article class="ex">
+      <div class="pficon"><span>Mojo</span><em>pelvic<br>floor</em></div>
+      <div class="exbody">
+        <div class="extop"><h3>Reverse Kegels (Mojo)</h3><span class="tag">Mojo</span></div>
+        <p class="dose">Gentle release/push 3–5 sec × 8–10</p>
+        <p class="cue">Think: let the pelvic floor drop and expand, like releasing to urinate.</p>
+        
+      </div>
+    </article>
+    </section><section class="day" id="d4" hidden>
+      <h2>Day 4 — Core & Posture</h2><p class="focus">Teach your trunk to hold the pelvis level. ~26–35 min before cardio, depending on week.</p><article class="ex">
+      <div class="video-demo" data-video-id="5qah1cTaJCk" data-video-title="Dead Bug" aria-label="Dead Bug demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Dead Bug</h3><span class="tag">Core</span></div>
+        <p class="dose">2 × 6–8 / side</p>
+        <p class="cue">Press your lower back into the floor; exhale as you extend.</p>
+        <p class="tilt"><b>Why:</b> Trains deep core to hold the pelvis neutral instead of tipping forward.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="Zb94Y4VLRtU" data-video-title="Forearm Plank" aria-label="Forearm Plank demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Forearm Plank</h3><span class="tag">Core</span></div>
+        <p class="dose">3 × 20–40 sec</p>
+        <p class="cue">Ribs down, tailbone tucked, keep breathing.</p>
+        <p class="tilt"><b>Why:</b> Anti-extension core strength that resists forward pelvic tilt.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="B1gwnw5r2JI" data-video-title="Bird Dog" aria-label="Bird Dog demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Bird Dog</h3><span class="tag">Core</span></div>
+        <p class="dose">2 × 6–8 / side</p>
+        <p class="cue">Hips level, reach long; brace your core lightly.</p>
+        <p class="tilt"><b>Why:</b> Glute + core coordination for a stable pelvis.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="fCC2KpIutFs" data-video-title="Glute Bridge" aria-label="Glute Bridge demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Glute Bridge</h3><span class="tag">Strength</span></div>
+        <p class="dose">2–3 × 10–12, 2-sec hold</p>
+        <p class="cue">Exhale, squeeze glutes, tuck tailbone slightly at the top.</p>
+        <p class="tilt"><b>Why:</b> Key move: strong glutes pull the pelvis out of a forward tilt.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="ccRw3WL1u3U" data-video-title="Half-Kneeling Hip Flexor Stretch" aria-label="Half-Kneeling Hip Flexor Stretch demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Half-Kneeling Hip Flexor Stretch</h3><span class="tag">Stretch</span></div>
+        <p class="dose">2 × 40 sec / side</p>
+        <p class="cue">Tuck tailbone, ribs down; gently squeeze the back-side glute.</p>
+        <p class="tilt"><b>Why:</b> The priority stretch: tight hip flexors are the main driver of forward pelvic tilt.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="9jpchJcKivk" data-video-title="Diaphragm Breathing" aria-label="Diaphragm Breathing demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Diaphragm Breathing</h3><span class="tag">Mojo</span></div>
+        <p class="dose">2 min</p>
+        <p class="cue">Inhale: belly rises, pelvic floor drops. Exhale: let it all relax. On every inhale, feel your pelvic floor drop and relax.</p>
+        <p class="tilt"><b>Why:</b> Calms tight pelvic floor and hip flexors before strengthening.</p>
+      </div>
+    </article><article class="ex">
+      <div class="cardio-icon" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M32 54V16"/><path d="M20 28l12-12 12 12"/><path d="M17 54h30"/></svg></div>
+      <div class="exbody">
+        <div class="extop"><h3>Zip-Up Engagement</h3><span class="tag">Core</span></div>
+        <p class="dose">8 reps × 2 sets, 5-sec holds</p>
+        <p class="cue">Standing tall, imagine zipping up from your pubic bone to your ribs — draw your belly button up and in. This sets your pelvis so your hip doesn't drop as you move. Breathe normally.</p>
+        <p class="tilt"><b>Why:</b> Deep-core engagement that stabilizes the pelvis so the hip stays level as you move.</p>
+      </div>
+    </article><article class="ex">
+      <div class="pficon"><span>Mojo</span><em>pelvic<br>floor</em></div>
+      <div class="exbody">
+        <div class="extop"><h3>Kegel Pulses — strength (Mojo)</h3><span class="tag">Mojo</span></div>
+        <p class="dose">1-sec squeeze, 1-sec release × 10, 2 sets</p>
+        <p class="cue">Squeeze like stopping gas; breathe normally, don't clench glutes or abs.</p>
+        
+      </div>
+    </article>
+    </section><section class="day" id="d5" hidden>
+      <h2>Day 5 — Open the Hips</h2><p class="focus">Deeper mobility + light strength. ~24–32 min before cardio, depending on week.</p><article class="ex">
+      <div class="video-demo" data-video-id="2uW-9KD5XOM" data-video-title="90/90 Hip Switches" aria-label="90/90 Hip Switches demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>90/90 Hip Switches</h3><span class="tag">Mobility</span></div>
+        <p class="dose">2 × 5–6 / side</p>
+        <p class="cue">Slow and controlled; keep your chest tall.</p>
+        <p class="tilt"><b>Why:</b> Opens internal and external hip rotation evenly.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="60htZqOg3pE" data-video-title="Frog Stretch" aria-label="Frog Stretch demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Frog Stretch</h3><span class="tag">Groin</span></div>
+        <p class="dose">2 × 45–60 sec</p>
+        <p class="cue">Knees wide, rock gently; mild stretch only, never sharp.</p>
+        <p class="tilt"><b>Why:</b> Releases inner-thigh and groin tightness that tugs the pelvis forward.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="sQ1CuSFp14A" data-video-title="Butterfly" aria-label="Butterfly demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Butterfly</h3><span class="tag">Groin</span></div>
+        <p class="dose">2 × 45 sec</p>
+        <p class="cue">Sit tall; ease the knees down, no bouncing.</p>
+        <p class="tilt"><b>Why:</b> Opens the groin while you practice sitting tall instead of slouching.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="xrPteyQLGAo" data-video-title="Reverse Lunge" aria-label="Reverse Lunge demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Reverse Lunge</h3><span class="tag">Strength</span></div>
+        <p class="dose">2 × 8 / side</p>
+        <p class="cue">Torso tall; tuck the pelvis under slightly at the bottom.</p>
+        <p class="tilt"><b>Why:</b> Strengthens glutes and quads while stretching the back-leg hip flexor.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="l83R5PblSMA" data-video-title="Deep Squat Hold" aria-label="Deep Squat Hold demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Deep Squat Hold</h3><span class="tag">Mobility</span></div>
+        <p class="dose">3 × 30–45 sec</p>
+        <p class="cue">Heels down if possible; chest up, knees track over toes. Use your elbows to gently press your knees open.</p>
+        <p class="tilt"><b>Why:</b> Full hip and ankle mobility with an upright torso.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="26RaPD6Zf44" data-video-title="Happy Baby" aria-label="Happy Baby demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Happy Baby</h3><span class="tag">Mojo</span></div>
+        <p class="dose">2 × 45 sec</p>
+        <p class="cue">Breathe into the stretch; rock gently side to side.</p>
+        <p class="tilt"><b>Why:</b> Mojo's pelvic-floor stretch: releases a tight pelvic floor.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="E6sqUHFt6Ng" data-video-title="Figure-4 Stretch" aria-label="Figure-4 Stretch demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Figure-4 Stretch</h3><span class="tag">Stretch</span></div>
+        <p class="dose">1 × 45 sec / side</p>
+        <p class="cue">On your back, ankle over opposite knee, pull the bottom thigh toward your chest — targets the deep glute/piriformis. Both sides.</p>
+        <p class="tilt"><b>Why:</b> Releases that "always sore" spot at the top of your butt — the deep glute and piriformis.</p>
+      </div>
+    </article><article class="ex">
+      <div class="pficon"><span>Mojo</span><em>pelvic<br>floor</em></div>
+      <div class="exbody">
+        <div class="extop"><h3>Kegel Holds — endurance (Mojo)</h3><span class="tag">Mojo</span></div>
+        <p class="dose">5-sec squeeze, 5-sec relax × 8–10, 2 sets</p>
+        <p class="cue">Build up to 10-sec holds over weeks.</p>
+        
+      </div>
+    </article>
+    </section><section class="day" id="d6" hidden>
+      <h2>Day 6 — Strength Circuit</h2><p class="focus">Heaviest day; keep form strict. ~26–32 min before cardio, depending on week.</p><article class="ex">
+      <div class="video-demo" data-video-id="fCC2KpIutFs" data-video-title="Glute Bridge" aria-label="Glute Bridge demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Glute Bridge</h3><span class="tag">Strength</span></div>
+        <p class="dose">2–3 × 10–12, 2-sec hold</p>
+        <p class="cue">Exhale, squeeze glutes, tuck tailbone slightly at the top.</p>
+        <p class="tilt"><b>Why:</b> Key move: strong glutes pull the pelvis out of a forward tilt.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="qc10y4MWpTM" data-video-title="Glute Kickback" aria-label="Glute Kickback demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Glute Kickback</h3><span class="tag">Strength</span></div>
+        <p class="dose">2 × 10 / side</p>
+        <p class="cue">Squeeze the glute to lift; don't arch your lower back.</p>
+        <p class="tilt"><b>Why:</b> Builds glute strength without extending the spine.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="xrPteyQLGAo" data-video-title="Reverse Lunge" aria-label="Reverse Lunge demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Reverse Lunge</h3><span class="tag">Strength</span></div>
+        <p class="dose">2 × 8 / side</p>
+        <p class="cue">Torso tall; tuck the pelvis under slightly at the bottom.</p>
+        <p class="tilt"><b>Why:</b> Strengthens glutes and quads while stretching the back-leg hip flexor.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="Zb94Y4VLRtU" data-video-title="Forearm Plank" aria-label="Forearm Plank demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Forearm Plank</h3><span class="tag">Core</span></div>
+        <p class="dose">3 × 20–40 sec</p>
+        <p class="cue">Ribs down, tailbone tucked, keep breathing.</p>
+        <p class="tilt"><b>Why:</b> Anti-extension core strength that resists forward pelvic tilt.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="5qah1cTaJCk" data-video-title="Dead Bug" aria-label="Dead Bug demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Dead Bug</h3><span class="tag">Core</span></div>
+        <p class="dose">2 × 6–8 / side</p>
+        <p class="cue">Press your lower back into the floor; exhale as you extend.</p>
+        <p class="tilt"><b>Why:</b> Trains deep core to hold the pelvis neutral instead of tipping forward.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="ccRw3WL1u3U" data-video-title="Half-Kneeling Hip Flexor Stretch" aria-label="Half-Kneeling Hip Flexor Stretch demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Half-Kneeling Hip Flexor Stretch</h3><span class="tag">Stretch</span></div>
+        <p class="dose">2 × 40 sec / side</p>
+        <p class="cue">Tuck tailbone, ribs down; gently squeeze the back-side glute.</p>
+        <p class="tilt"><b>Why:</b> The priority stretch: tight hip flexors are the main driver of forward pelvic tilt.</p>
+      </div>
+    </article><article class="ex">
+      <div class="pficon"><span>Mojo</span><em>pelvic<br>floor</em></div>
+      <div class="exbody">
+        <div class="extop"><h3>Reverse Kegels (Mojo)</h3><span class="tag">Mojo</span></div>
+        <p class="dose">Gentle release/push 3–5 sec × 8–10</p>
+        <p class="cue">Think: let the pelvic floor drop and expand, like releasing to urinate.</p>
+        
+      </div>
+    </article>
+    </section><section class="day" id="d7" hidden>
+      <h2>Day 7 — Recovery Flow</h2><p class="focus">Easy day: breathe, stretch, reset. ~27–39 min before cardio, depending on week.</p><article class="ex">
+      <div class="video-demo" data-video-id="9jpchJcKivk" data-video-title="Diaphragm Breathing" aria-label="Diaphragm Breathing demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Diaphragm Breathing</h3><span class="tag">Mojo</span></div>
+        <p class="dose">2 min</p>
+        <p class="cue">Inhale: belly rises, pelvic floor drops. Exhale: let it all relax. On every inhale, feel your pelvic floor drop and relax.</p>
+        <p class="tilt"><b>Why:</b> Calms tight pelvic floor and hip flexors before strengthening.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="LIVJZZyZ2qM" data-video-title="Cat-Cow" aria-label="Cat-Cow demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Cat-Cow</h3><span class="tag">Mobility</span></div>
+        <p class="dose">8 slow reps</p>
+        <p class="cue">Move with your breath; don't force the end ranges.</p>
+        <p class="tilt"><b>Why:</b> Teaches your pelvis to tilt both ways so you can find neutral.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="26RaPD6Zf44" data-video-title="Happy Baby" aria-label="Happy Baby demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Happy Baby</h3><span class="tag">Mojo</span></div>
+        <p class="dose">2 × 45 sec</p>
+        <p class="cue">Breathe into the stretch; rock gently side to side.</p>
+        <p class="tilt"><b>Why:</b> Mojo's pelvic-floor stretch: releases a tight pelvic floor.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="60htZqOg3pE" data-video-title="Frog Stretch" aria-label="Frog Stretch demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Frog Stretch</h3><span class="tag">Groin</span></div>
+        <p class="dose">2 × 45–60 sec</p>
+        <p class="cue">Knees wide, rock gently; mild stretch only, never sharp.</p>
+        <p class="tilt"><b>Why:</b> Releases inner-thigh and groin tightness that tugs the pelvis forward.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="sQ1CuSFp14A" data-video-title="Butterfly" aria-label="Butterfly demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Butterfly</h3><span class="tag">Groin</span></div>
+        <p class="dose">2 × 45 sec</p>
+        <p class="cue">Sit tall; ease the knees down, no bouncing.</p>
+        <p class="tilt"><b>Why:</b> Opens the groin while you practice sitting tall instead of slouching.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="2uW-9KD5XOM" data-video-title="90/90 Hip Switches" aria-label="90/90 Hip Switches demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>90/90 Hip Switches</h3><span class="tag">Mobility</span></div>
+        <p class="dose">2 × 5–6 / side</p>
+        <p class="cue">Slow and controlled; keep your chest tall.</p>
+        <p class="tilt"><b>Why:</b> Opens internal and external hip rotation evenly.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="VeusvyTQuUA" data-video-title="Legs-Up-The-Wall V" aria-label="Legs-Up-The-Wall V demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Legs-Up-The-Wall V</h3><span class="tag">Release</span></div>
+        <p class="dose">3 min</p>
+        <p class="cue">Legs up the wall, let them fall open into a V — breathe deeply and let the inner thighs and pelvic floor release.</p>
+        <p class="tilt"><b>Why:</b> Takes pressure off the hip joint so the inner thighs and pelvic floor can finally stop guarding.</p>
+      </div>
+    </article><article class="ex">
+      <div class="video-demo" data-video-id="alxKAuapzAo" data-video-title="Child's Pose (Wide Knee)" aria-label="Child's Pose (Wide Knee) demo"></div>
+      <div class="exbody">
+        <div class="extop"><h3>Child's Pose (Wide Knee)</h3><span class="tag">Release</span></div>
+        <p class="dose">90 sec</p>
+        <p class="cue">Big toes touching, knees wide, fold forward — forehead to floor, breathe into your lower back.</p>
+        <p class="tilt"><b>Why:</b> Opens the hips and groin while slow breathing relaxes the pelvic floor.</p>
+      </div>
+    </article><article class="ex">
+      <div class="pficon"><span>Mojo</span><em>pelvic<br>floor</em></div>
+      <div class="exbody">
+        <div class="extop"><h3>Reverse Kegels (Mojo)</h3><span class="tag">Mojo</span></div>
+        <p class="dose">Gentle release/push 3–5 sec × 8–10</p>
+        <p class="cue">Think: let the pelvic floor drop and expand, like releasing to urinate.</p>
+        
+      </div>
+    </article>
+    </section>
+<div class="safety"><b>Safety:</b> stop any exercise that causes sharp pain. This routine isn't a diagnosis for hip
+misalignment — if pain persists, see a physio. And if ED is new or persistent, check in with a clinician.</div>
+<footer>Built for Todd · October 2026 · Mojo exercise names follow the app's Stretch &amp; Strengthen approach</footer>
+</div>
+<script>
+(function(){
+  'use strict';
+
+  var themeButton=document.querySelector('.theme-toggle');
+  function updateThemeButton(){
+    var isLight=document.documentElement.classList.contains('light');
+    themeButton.textContent=isLight?'Dark':'Light';
+    themeButton.setAttribute('aria-label',isLight?'Switch to dark theme':'Switch to light theme');
+    themeButton.setAttribute('aria-pressed',String(isLight));
+  }
+  themeButton.addEventListener('click',function(){
+    document.documentElement.classList.toggle('light');
+    updateThemeButton();
+    if(typeof syncHashState==='function'){syncHashState();}
+  });
+  updateThemeButton();
+
+  var dayLinks=Array.prototype.slice.call(document.querySelectorAll('nav.days a'));
+  var daySections=Array.prototype.slice.call(document.querySelectorAll('.day'));
+  function pelvicFloorCard(kind){
+    var details={
+      pulses:{title:'Kegel Pulses — strength (Mojo)',dose:'1-sec squeeze, 1-sec release × 10, 2 sets',cue:"Squeeze like stopping gas; breathe normally, don't clench glutes or abs."},
+      holds:{title:'Kegel Holds — endurance (Mojo)',dose:'5-sec squeeze, 5-sec relax × 8–10, 2 sets',cue:'Build up to 10-sec holds over weeks.'},
+      reverse:{title:'Reverse Kegels (Mojo)',dose:'Gentle release/push 3–5 sec × 8–10',cue:'Think: let the pelvic floor drop and expand, like releasing to urinate.'}
+    }[kind];
+    var article=document.createElement('article');
+    article.className='ex';
+    article.innerHTML='<div class="pficon"><span>Mojo</span><em>pelvic<br>floor</em></div><div class="exbody"><div class="extop"><h3>'+details.title+'</h3><span class="tag">Mojo</span></div><p class="dose">'+details.dose+'</p><p class="cue">'+details.cue+'</p></div>';
+    return article;
+  }
+  daySections.forEach(function(section,index){
+    var existingIcon=section.querySelector('.pficon');
+    var existingCard=existingIcon&&existingIcon.closest('.ex');
+    if(!existingCard){return;}
+    var group=document.createElement('section');
+    group.className='pf-group';
+    group.setAttribute('aria-labelledby','pelvic-floor-day-'+(index+1));
+    var dayTitles=Array.prototype.map.call(section.querySelectorAll('h3'),function(h){return h.textContent.trim();});
+    var openerNames=[];
+    if(dayTitles.indexOf('Happy Baby')!==-1){openerNames.push('Happy Baby');}
+    if(dayTitles.indexOf('Butterfly')!==-1){openerNames.push('Butterfly');}
+    if(dayTitles.indexOf('Frog Stretch')!==-1){openerNames.push('Frog');}
+    var stretchSentence=openerNames.length
+      ?'Stretch is covered by today\'s hip openers ('+openerNames.join(' / ')+') plus deep breathing.'
+      :'Stretch and release are covered by today\'s mobility work and deep breathing — there are no Happy Baby, Butterfly, or Frog stretches today.';
+    var intro=document.createElement('div');
+    intro.className='pf-group-intro';
+    intro.innerHTML='<h3 id="pelvic-floor-day-'+(index+1)+'">Pelvic Floor</h3><p><b>Do all three every day</b> — Mojo\'s physio guidance: with a weak or normal pelvic floor, do the full set. '+stretchSentence+'</p><p class="pf-group-safety"><b>If your pelvic floor feels tight or painful</b> — pelvic pain, pain on ejaculation, frequent urination — skip the pulses and holds, stick to breathing and stretching, and see a doctor or pelvic-floor physiotherapist.</p>';
+    group.appendChild(intro);
+    group.appendChild(pelvicFloorCard('pulses'));
+    group.appendChild(pelvicFloorCard('holds'));
+    group.appendChild(pelvicFloorCard('reverse'));
+    existingCard.replaceWith(group);
+  });
+  var dayNav=document.querySelector('nav.days');
+  var selectorStack=document.querySelector('.selector-stack');
+  var weekButtons=Array.prototype.slice.call(document.querySelectorAll('.week-picker button'));
+  var currentWeek=1;
+  var dayShortLabels=dayLinks.map(function(link){return link.textContent.trim();});
+  var dayCompletionKeys=dayLinks.map(function(link,index){return 'Day '+(index+1);});
+  var completionByWeek={};
+  var currentDayIndex=0;
+  var timerControllers=[];
+  function pauseTimersInSection(section){
+    if(!section||typeof timerControllers==='undefined'||!timerControllers){return;}
+    timerControllers.slice().forEach(function(ctrl){
+      if(ctrl&&ctrl.widget&&section.contains(ctrl.widget)&&typeof ctrl.pause==='function'){ctrl.pause();}
+    });
+  }
+  function syncHashState(){
+    try{
+      var masks=[];var any=false;
+      for(var w=1;w<=8;w++){
+        var m=0;var st=completionByWeek[w]||{};
+        for(var d=0;d<7;d++){if(st['Day '+(d+1)]){m|=(1<<d);any=true;}}
+        masks.push(m);
+      }
+      var hash='#d'+(currentDayIndex+1)+'-w'+currentWeek;
+      if(document.documentElement.classList.contains('light')){hash+='-light';}
+      if(any){hash+='-done.'+masks.join('.');}
+      if(window.location.hash!==hash&&window.history&&window.history.replaceState){
+        window.history.replaceState(null,'',hash);
+      }
+    }catch(e){}
+  }
+  function parseHashState(){
+    var out={};
+    try{
+      var h=window.location.hash||'';
+      var dm=h.match(/d([1-7])(?![0-9])/);if(!dm){dm=h.match(/d([1-7])$/);}
+      if(dm){out.day=parseInt(dm[1],10);}
+      var wm=h.match(/-w([1-8])(?![0-9])/);if(wm){out.week=parseInt(wm[1],10);}
+      if(h.indexOf('-light')!==-1){out.light=true;}
+      var doneMatch=h.match(/done\.([0-9]+(?:\.[0-9]+)*)/);
+      if(doneMatch){out.masks=doneMatch[1].split('.').map(function(s){return parseInt(s,10)||0;});}
+    }catch(e){}
+    return out;
+  }
+  (function restoreFromHash(){
+    var saved=parseHashState();
+    if(saved.week){currentWeek=saved.week;}
+    weekButtons.forEach(function(button,index){
+      button.setAttribute('aria-pressed',String(index+1===currentWeek));
+    });
+    if(saved.masks){
+      saved.masks.forEach(function(mask,wi){
+        if(!mask){return;}
+        var st=completionByWeek[wi+1]||(completionByWeek[wi+1]={});
+        for(var d=0;d<7;d++){if(mask&(1<<d)){st['Day '+(d+1)]=true;}}
+      });
+    }
+    if(saved.light){
+      document.documentElement.classList.add('light');
+      updateThemeButton();
+    }
+    if(saved.day){currentDayIndex=saved.day-1;}
+  })();
+  var dayHeadings=daySections.map(function(section){
+    var text=section.querySelector('h2').textContent;
+    var parts=text.split(' — ');
+    return {day:parts[0],focus:parts.slice(1).join(' — ')};
+  });
+  function dayIsComplete(index){
+    return Boolean(completionByWeek[currentWeek]&&completionByWeek[currentWeek][dayCompletionKeys[index]]);
+  }
+  function renderCompletionState(){
+    dayLinks.forEach(function(link,index){
+      var done=dayIsComplete(index);
+      link.textContent=dayShortLabels[index]+(done?' ✓':'');
+      link.classList.toggle('is-complete',done);
+      link.setAttribute('aria-label',dayHeadings[index].day+(done?', complete for week '+currentWeek:''));
+    });
+    daySections.forEach(function(section,index){
+      var button=section.querySelector('.day-completion');
+      if(!button){return;}
+      var done=dayIsComplete(index);
+      button.textContent=done?'✓ '+dayHeadings[index].day+' done — tap to undo':'Mark '+dayHeadings[index].day+' as done';
+      button.classList.toggle('is-done',done);
+      button.setAttribute('aria-pressed',String(done));
+    });
+  }
+  function toggleDayCompletion(index){
+    var weekState=completionByWeek[currentWeek]||(completionByWeek[currentWeek]={});
+    weekState[dayCompletionKeys[index]]=!weekState[dayCompletionKeys[index]];
+    renderCompletionState();
+    syncHashState();
+  }
+  function setWeek(week){
+    currentWeek=week;
+    weekButtons.forEach(function(button,index){
+      button.setAttribute('aria-pressed',String(index+1===currentWeek));
+    });
+    updateWorkoutForWeek();
+    renderCompletionState();
+    syncHashState();
+  }
+  weekButtons.forEach(function(button,index){
+    button.addEventListener('click',function(){setWeek(index+1);});
+  });
+  function pauseVideosInSection(section){
+    Array.prototype.forEach.call(section.querySelectorAll('.video-demo'),function(demo){
+      if(typeof pauseDemo==='function'&&typeof clipTimers!=='undefined'&&clipTimers){pauseDemo(demo);}
+    });
+  }
+  function scrollDayToTop(section){
+    window.requestAnimationFrame(function(){
+      var navHeight=selectorStack?selectorStack.getBoundingClientRect().height:(dayNav?dayNav.getBoundingClientRect().height:0);
+      var y=window.scrollY+section.getBoundingClientRect().top-navHeight-10;
+      window.scrollTo({top:Math.max(0,y),behavior:'auto'});
+    });
+  }
+  function showDay(index,shouldScroll){
+    currentDayIndex=index;
+    daySections.forEach(function(section,i){
+      if(i===index){section.hidden=false;}
+      else{pauseVideosInSection(section);pauseTimersInSection(section);section.hidden=true;}
+    });
+    dayLinks.forEach(function(link,i){
+      if(i===index){link.setAttribute('aria-current','page');}
+      else{link.removeAttribute('aria-current');}
+    });
+    if(dayLinks[index]){
+      dayLinks[index].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+    }
+    if(shouldScroll&&daySections[index]){scrollDayToTop(daySections[index]);}
+    syncHashState();
+  }
+  window.addEventListener('hashchange',function(){
+    var saved=parseHashState();
+    if(saved.day&&saved.day-1!==currentDayIndex){showDay(saved.day-1,false);}
+  });
+  daySections.forEach(function(section,index){
+    var cardio=document.createElement('article');
+    cardio.className='ex cardio-card';
+    cardio.innerHTML='<div class="cardio-icon" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M9 33h10l5-12 8 25 7-17 5 9h11"/><circle cx="32" cy="32" r="26"/></svg></div><div class="exbody"><div class="extop"><h3>Cardio</h3><span class="tag">Heart health</span></div><p class="dose">Brisk walk — 15 min</p><p class="cue">You should be able to talk but feel your heart working.</p><p class="cardio-note">Aim for 3–5 sessions this week, any days you like.</p></div>';
+    section.appendChild(cardio);
+    var controls=document.createElement('div');
+    controls.className='day-switcher';
+    controls.setAttribute('aria-label','Sequential day navigation');
+    var previous=document.createElement('button');
+    previous.type='button';
+    previous.textContent='← Prev';
+    previous.disabled=index===0;
+    previous.setAttribute('aria-label',index===0?'No previous day':'Show Day '+index);
+    var next=document.createElement('button');
+    next.type='button';
+    next.textContent='Next →';
+    next.disabled=index===daySections.length-1;
+    next.setAttribute('aria-label',index===daySections.length-1?'No next day':'Show Day '+(index+2));
+    previous.addEventListener('click',function(){if(index>0){showDay(index-1,true);}});
+    next.addEventListener('click',function(){if(index<daySections.length-1){showDay(index+1,true);}});
+    controls.appendChild(previous);controls.appendChild(next);
+    section.appendChild(controls);
+    var completionButton=document.createElement('button');
+    completionButton.type='button';
+    completionButton.className='day-completion';
+    completionButton.addEventListener('click',function(){toggleDayCompletion(index);});
+    section.appendChild(completionButton);
+  });
+  renderCompletionState();
+  dayLinks.forEach(function(link,index){
+    link.addEventListener('click',function(event){event.preventDefault();showDay(index,true);});
+  });
+  showDay(currentDayIndex,false);
+
+  var configs=[
+    {match:'Diaphragm Breathing',mode:'countdown',variants:[[120,1],[120,1],[120,1],[120,1]]},
+    {match:'Cat-Cow',mode:'reps',variants:[[8,1],[10,1],[10,1],[12,1]]},
+    {match:'Glute Bridge',mode:'reps',variants:[[12,3],[15,3],[15,4],[20,3]]},
+    {match:'Dead Bug',mode:'reps',variants:[[8,2],[10,2],[10,3],[12,3]]},
+    {match:'90/90 Hip Switches',mode:'reps',variants:[[6,2],[8,2],[8,2],[10,2]]},
+    {match:'Frog Stretch',mode:'countdown',variants:[[60,2],[60,2],[75,2],[90,2]]},
+    {match:'Glute Kickback',mode:'reps',variants:[[12,2],[15,2],[15,3],[20,3]]},
+    {match:'Reverse Lunge',mode:'reps',variants:[[10,2],[12,2],[12,3],[15,3]]},
+    {match:'Bird Dog',mode:'reps',variants:[[8,2],[10,2],[10,3],[12,3]]},
+    {match:'Half-Kneeling Hip Flexor Stretch',mode:'countdown',variants:[[45,2],[60,2],[60,2],[75,2]]},
+    {match:'Butterfly',mode:'countdown',variants:[[60,2],[60,2],[60,2],[60,2]]},
+    {match:'Deep Squat Hold',mode:'countdown',variants:[[45,3],[60,3],[60,3],[75,3]]},
+    {match:'Happy Baby',mode:'countdown',variants:[[60,2],[60,2],[60,2],[60,2]]},
+    {match:'Forearm Plank',mode:'countdown',variants:[[40,3],[50,3],[60,3],[60,4]]},
+    {match:'Kegel Pulses',mode:'reps',variants:[[10,2],[15,2],[15,3],[20,3]]},
+    {match:'Kegel Holds',mode:'holdreps',variants:[[10,2,5],[10,2,8],[12,3,10],[12,3,10]]},
+    {match:'Reverse Kegels',mode:'reps',variants:[[10,2],[12,2],[15,2],[15,3]]},
+    {match:'Legs-Up-The-Wall V',mode:'countdown',variants:[[180,1],[240,1],[240,1],[300,1]]},
+    {match:"Child's Pose (Wide Knee)",mode:'countdown',variants:[[90,1],[120,1],[120,1],[120,2]]},
+    {match:'Figure-4 Stretch',mode:'countdown',variants:[[45,1],[60,1],[60,1],[60,2]]},
+    {match:'Zip-Up Engagement',mode:'holdreps',variants:[[8,2,5],[10,2,5],[10,3,5],[12,3,5]]},
+    {match:'Cardio',mode:'countdown',variants:[[900,1],[1200,1],[1500,1],[1800,1]]}
+  ];
+  var activeTimerIds=[];
+  function configForTitle(title){
+    var base=configs.find(function(item){return title.indexOf(item.match)===0;});
+    if(!base){return null;}
+    var bracket=Math.min(3,Math.floor((currentWeek-1)/2));
+    var variant=base.variants[bracket];
+    return {match:base.match,mode:base.mode,amount:variant[0],sets:variant[1],hold:variant[2]||0};
+  }
+  function doseFor(config){
+    var amount=config.amount,sets=config.sets;
+    if(config.match==='Diaphragm Breathing'){return '2 min';}
+    if(config.match==='Cat-Cow'){return amount+' slow reps';}
+    if(config.match==='Glute Bridge'){return sets+' × '+amount+', 2-sec hold';}
+    if(config.match==='Dead Bug'||config.match==='90/90 Hip Switches'||config.match==='Glute Kickback'||config.match==='Reverse Lunge'||config.match==='Bird Dog'){return sets+' × '+amount+' / side';}
+    if(config.match==='Frog Stretch'){return sets+' × '+amount+' sec';}
+    if(config.match==='Half-Kneeling Hip Flexor Stretch'){return sets+' × '+amount+' sec / side';}
+    if(config.match==='Butterfly'||config.match==='Deep Squat Hold'||config.match==='Happy Baby'||config.match==='Forearm Plank'){return sets+' × '+amount+' sec';}
+    if(config.match==='Kegel Pulses'){return '1-sec squeeze, 1-sec release × '+amount+', '+sets+' sets';}
+    if(config.match==='Kegel Holds'){return config.hold+'-sec squeeze, '+config.hold+'-sec relax × '+amount+', '+sets+' sets';}
+    if(config.match==='Reverse Kegels'){return 'Gentle release/push 3–5 sec × '+amount+', '+sets+' sets';}
+    if(config.match==='Legs-Up-The-Wall V'||config.match==="Child's Pose (Wide Knee)"){return (amount%60===0?(amount/60)+' min':amount+' sec')+(sets>1?' × '+sets:'');}
+    if(config.match==='Figure-4 Stretch'){return sets+' × '+amount+' sec / side';}
+    if(config.match==='Zip-Up Engagement'){return amount+' reps × '+sets+' sets, 5-sec holds';}
+    if(config.match==='Cardio'){
+      var activity=currentWeek>=7?'Brisk walk or easy jog':'Brisk walk';
+      return activity+' — '+Math.round(amount/60)+' min';
+    }
+    return sets+' × '+amount;
+  }
+
+  var audioContext=null;
+  function ensureAudio(){
+    try{
+      if(!audioContext){
+        var AudioCtor=window.AudioContext||window.webkitAudioContext;
+        if(AudioCtor){audioContext=new AudioCtor();}
+      }
+      if(audioContext&&audioContext.state==='suspended'){audioContext.resume();}
+    }catch(e){}
+  }
+  function beep(){
+    try{
+      if(!audioContext){return;}
+      var oscillator=audioContext.createOscillator();
+      var gain=audioContext.createGain();
+      oscillator.type='sine';
+      oscillator.frequency.setValueAtTime(660,audioContext.currentTime);
+      gain.gain.setValueAtTime(.0001,audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.16,audioContext.currentTime+.015);
+      gain.gain.exponentialRampToValueAtTime(.0001,audioContext.currentTime+.16);
+      oscillator.connect(gain);gain.connect(audioContext.destination);
+      oscillator.start();oscillator.stop(audioContext.currentTime+.18);
+    }catch(e){}
+  }
+  function formatTime(seconds){
+    var mins=Math.floor(seconds/60);
+    var secs=seconds%60;
+    return String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');
+  }
+  function baseWidget(config){
+    var widget=document.createElement('div');
+    widget.className='timer-widget';
+    widget.setAttribute('data-mode',config.mode);
+    var meta=document.createElement('div');
+    meta.className='timer-meta';
+    var setLabel=document.createElement('span');
+    setLabel.className='timer-set';
+    var modeLabel=document.createElement('span');
+    modeLabel.textContent=config.mode==='countdown'?'Timer':'Rep counter';
+    meta.appendChild(setLabel);meta.appendChild(modeLabel);
+    var status=document.createElement('p');
+    status.className='timer-status';
+    status.setAttribute('aria-live','polite');
+    status.textContent='Ready';
+    widget.appendChild(meta);
+    widget.appendChild(status);
+    return {widget:widget,setLabel:setLabel,status:status};
+  }
+  function addCountdown(cue,config,title){
+    var parts=baseWidget(config);
+    var readout=document.createElement('div');
+    readout.className='timer-readout';
+    readout.setAttribute('role','timer');
+    var controls=document.createElement('div');
+    controls.className='timer-controls';
+    var main=document.createElement('button');
+    main.type='button';main.className='timer-btn timer-primary';
+    var reset=document.createElement('button');
+    reset.type='button';reset.className='timer-btn timer-reset';reset.textContent='Reset';
+    controls.appendChild(main);controls.appendChild(reset);
+    parts.widget.insertBefore(readout,parts.status);
+    parts.widget.appendChild(controls);
+    cue.insertAdjacentElement('afterend',parts.widget);
+
+    var remaining=config.amount,currentSet=1,timerId=null,hasStarted=false,done=false,endAt=0;
+    function render(){
+      readout.textContent=formatTime(remaining);
+      parts.setLabel.textContent=done?'Done':'Set '+currentSet+' of '+config.sets;
+      main.textContent=done?'Done':timerId?'Pause':hasStarted?'Resume':'Start';
+      main.disabled=done;
+      main.setAttribute('aria-label',main.textContent+' '+title+' timer');
+    }
+    function stopTimer(){
+      if(timerId){
+        window.clearInterval(timerId);
+        activeTimerIds=activeTimerIds.filter(function(id){return id!==timerId;});
+        timerId=null;
+      }
+    }
+    function syncRemaining(){
+      remaining=Math.max(0,Math.ceil((endAt-Date.now())/1000));
+    }
+    function pauseTimer(silent){
+      if(!timerId){return;}
+      syncRemaining();
+      stopTimer();
+      hasStarted=true;
+      if(!silent){parts.status.textContent='Paused';}
+      render();
+    }
+    function finishSet(){
+      stopTimer();beep();
+      if(currentSet>=config.sets){
+        done=true;hasStarted=false;remaining=0;parts.status.textContent='Done';
+      }else{
+        currentSet+=1;remaining=config.amount;hasStarted=false;
+        parts.status.textContent='Set '+(currentSet-1)+' complete · next set ready';
+      }
+      render();
+    }
+    function tick(){
+      syncRemaining();
+      render();
+      if(remaining<=0){finishSet();}
+    }
+    main.addEventListener('click',function(){
+      if(done){return;}
+      ensureAudio();
+      if(timerId){
+        pauseTimer(false);
+        return;
+      }
+      hasStarted=true;
+      parts.status.textContent='Timer running';
+      endAt=Date.now()+remaining*1000;
+      timerId=window.setInterval(tick,200);
+      activeTimerIds.push(timerId);
+      tick();
+    });
+    reset.addEventListener('click',function(){
+      stopTimer();remaining=config.amount;currentSet=1;hasStarted=false;done=false;endAt=0;
+      parts.status.textContent='Ready';render();
+    });
+    timerControllers.push({widget:parts.widget,pause:function(){pauseTimer(true);if(timerId===null&&hasStarted&&!done){parts.status.textContent='Paused — timer stopped when you left this day';}}});
+    render();
+  }
+  function addRepCounter(cue,config,title){
+    var parts=baseWidget(config);
+    var tap=document.createElement('button');
+    tap.type='button';tap.className='timer-btn timer-primary timer-rep';
+    var controls=document.createElement('div');
+    controls.className='timer-controls';
+    controls.style.gridTemplateColumns='minmax(0,1fr) 88px';
+    var spacer=document.createElement('span');
+    spacer.setAttribute('aria-hidden','true');
+    var reset=document.createElement('button');
+    reset.type='button';reset.className='timer-btn timer-reset';reset.textContent='Reset';
+    parts.widget.insertBefore(tap,parts.status);
+    controls.appendChild(spacer);controls.appendChild(reset);
+    parts.widget.appendChild(controls);
+    cue.insertAdjacentElement('afterend',parts.widget);
+
+    var count=0,currentSet=1,done=false;
+    function render(){
+      parts.setLabel.textContent=done?'Done':'Set '+currentSet+' of '+config.sets;
+      tap.textContent=done?'Done':'Tap · '+count+' / '+config.amount;
+      tap.disabled=done;
+      tap.setAttribute('aria-label',done?title+' complete':'Count '+title+' repetition '+(count+1)+' of '+config.amount);
+    }
+    tap.addEventListener('click',function(){
+      if(done){return;}
+      count+=1;
+      if(count>=config.amount){
+        if(currentSet>=config.sets){
+          done=true;parts.status.textContent='Done';
+        }else{
+          parts.status.textContent='Set '+currentSet+' complete · set '+(currentSet+1)+' ready';
+          currentSet+=1;count=0;
+        }
+      }else{parts.status.textContent='Keep going';}
+      render();
+    });
+    reset.addEventListener('click',function(){
+      count=0;currentSet=1;done=false;parts.status.textContent='Ready';render();
+    });
+    render();
+  }
+
+  function addHoldRepCounter(cue,config,title){
+    var parts=baseWidget(config);
+    var tap=document.createElement('button');
+    tap.type='button';tap.className='timer-btn timer-primary timer-rep';
+    var controls=document.createElement('div');
+    controls.className='timer-controls';
+    controls.style.gridTemplateColumns='minmax(0,1fr) 88px';
+    var spacer=document.createElement('span');
+    spacer.setAttribute('aria-hidden','true');
+    var reset=document.createElement('button');
+    reset.type='button';reset.className='timer-btn timer-reset';reset.textContent='Reset';
+    var readout=document.createElement('div');
+    readout.className='timer-readout';
+    readout.setAttribute('role','timer');
+    readout.textContent=formatTime(config.hold||5);
+    parts.widget.insertBefore(readout,parts.status);
+    parts.widget.insertBefore(tap,parts.status);
+    controls.appendChild(spacer);controls.appendChild(reset);
+    parts.widget.appendChild(controls);
+    cue.insertAdjacentElement('afterend',parts.widget);
+
+    var count=0,currentSet=1,done=false,holdId=null,holdEndAt=0;
+    function render(holdLeft){
+      parts.setLabel.textContent=done?'Done':'Set '+currentSet+' of '+config.sets;
+      if(holdId){
+        tap.textContent='Hold… '+holdLeft+'s';
+        tap.disabled=true;
+        readout.textContent=formatTime(holdLeft);
+      }else{
+        tap.textContent=done?'Done':'Tap to start hold · '+count+' / '+config.amount;
+        tap.disabled=done;
+        readout.textContent=formatTime(config.hold||5);
+      }
+      tap.setAttribute('aria-label',done?title+' complete':'Start '+(config.hold||5)+'-second hold for '+title+', repetition '+(count+1)+' of '+config.amount);
+    }
+    function stopHold(countRep){
+      if(holdId){window.clearInterval(holdId);activeTimerIds=activeTimerIds.filter(function(id){return id!==holdId;});holdId=null;}
+      if(!countRep){render(config.hold||5);return;}
+      beep();
+      count+=1;
+      if(count>=config.amount){
+        if(currentSet>=config.sets){
+          done=true;parts.status.textContent='Done';
+        }else{
+          parts.status.textContent='Set '+currentSet+' complete · set '+(currentSet+1)+' ready';
+          currentSet+=1;count=0;
+        }
+      }else{parts.status.textContent='Rep counted — tap for the next hold';}
+      render(config.hold||5);
+    }
+    function holdTick(){
+      var left=Math.max(0,Math.ceil((holdEndAt-Date.now())/1000));
+      if(left<=0){stopHold(true);return;}
+      render(left);
+    }
+    tap.addEventListener('click',function(){
+      if(done||holdId){return;}
+      ensureAudio();
+      parts.status.textContent='Hold — keep the engagement for '+(config.hold||5)+' seconds';
+      holdEndAt=Date.now()+(config.hold||5)*1000;
+      holdId=window.setInterval(holdTick,200);
+      activeTimerIds.push(holdId);
+      holdTick();
+    });
+    reset.addEventListener('click',function(){
+      if(holdId){window.clearInterval(holdId);activeTimerIds=activeTimerIds.filter(function(id){return id!==holdId;});holdId=null;}
+      count=0;currentSet=1;done=false;parts.status.textContent='Ready';render(config.hold||5);
+    });
+    timerControllers.push({widget:parts.widget,pause:function(){
+      if(holdId){window.clearInterval(holdId);activeTimerIds=activeTimerIds.filter(function(id){return id!==holdId;});holdId=null;parts.status.textContent='Hold cancelled — you left this day';render(config.hold||5);}
+    }});
+    render(config.hold||5);
+  }
+
+  function setupTimers(){
+    activeTimerIds.forEach(function(id){window.clearInterval(id);});
+    activeTimerIds=[];
+    timerControllers.length=0;
+    Array.prototype.forEach.call(document.querySelectorAll('.timer-widget'),function(widget){widget.remove();});
+    Array.prototype.forEach.call(document.querySelectorAll('.ex'),function(card){
+      var heading=card.querySelector('h3');
+      var cue=card.querySelector('.cue');
+      if(!heading||!cue){return;}
+      var title=heading.textContent.trim();
+      var config=configForTitle(title);
+      if(!config){return;}
+      if(config.mode==='countdown'){addCountdown(cue,config,title);}
+      else if(config.mode==='holdreps'){addHoldRepCounter(cue,config,title);}
+      else{addRepCounter(cue,config,title);}
+    });
+  }
+  function updateWorkoutForWeek(){
+    daySections.forEach(function(section,index){
+      section.querySelector('h2').textContent=dayHeadings[index].day+' — '+dayHeadings[index].focus;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.ex'),function(card){
+      var heading=card.querySelector('h3');
+      var dose=card.querySelector('.dose');
+      if(!heading||!dose){return;}
+      var config=configForTitle(heading.textContent.trim());
+      if(config){dose.textContent=doseFor(config);}
+    });
+    setupTimers();
+  }
+  updateWorkoutForWeek();
+
+
+  var videoDemos=Array.prototype.slice.call(document.querySelectorAll('.video-demo'));
+  var youtubeApiReady=false;
+  var youtubeApiFailed=false;
+  var clipTimers=new Map();
+  var videoStartOffsets={
+    fCC2KpIutFs:0,
+    '5qah1cTaJCk':8,
+    B1gwnw5r2JI:0,
+    l83R5PblSMA:0,
+    xrPteyQLGAo:0,
+    qc10y4MWpTM:10,
+    '9jpchJcKivk':75,
+    LIVJZZyZ2qM:0,
+    '2uW-9KD5XOM':30,
+    '60htZqOg3pE':20,
+    ccRw3WL1u3U:0,
+    sQ1CuSFp14A:5,
+    '26RaPD6Zf44':0,
+    Zb94Y4VLRtU:0,
+    VeusvyTQuUA:0,
+    alxKAuapzAo:0,
+    E6sqUHFt6Ng:0
+  };
+
+  function videoStartOffset(demo){
+    return videoStartOffsets[demo.getAttribute('data-video-id')]||0;
+  }
+  function youtubeUrl(demo){
+    return 'https://www.youtube.com/watch?v='+demo.getAttribute('data-video-id')+'&t='+videoStartOffset(demo)+'s';
+  }
+  function addPlaceholder(demo){
+    var placeholder=document.createElement('div');
+    placeholder.className='video-placeholder';
+    placeholder.setAttribute('aria-live','polite');
+    var label=document.createElement('span');
+    label.textContent='Real-form demo · plays when in view';
+    placeholder.appendChild(label);
+    var target=document.createElement('div');
+    target.className='video-player';
+    target.id='yt-demo-'+Math.random().toString(36).slice(2);
+    demo.appendChild(placeholder);
+    demo.appendChild(target);
+    var tapOverlay=document.createElement('div');
+    tapOverlay.className='video-tap';
+    tapOverlay.setAttribute('role','button');
+    tapOverlay.tabIndex=0;
+    tapOverlay.setAttribute('aria-label','Play '+demo.getAttribute('data-video-title')+' with controls and sound');
+    var tapHint=document.createElement('span');
+    tapHint.textContent='Tap for controls & sound';
+    tapOverlay.appendChild(tapHint);
+    demo.appendChild(tapOverlay);
+    demo._placeholder=placeholder;
+    demo._target=target;
+    demo._tapOverlay=tapOverlay;
+    demo._player=null;
+    demo._playerReady=false;
+    demo._shouldPlay=false;
+    demo._takenOver=false;
+    demo._pendingStart=null;
+    window.setTimeout(function(){tapOverlay.classList.add('is-faded');},2600);
+    tapOverlay.addEventListener('click',function(){takeOver(demo);});
+    tapOverlay.addEventListener('keydown',function(event){
+      if(event.key==='Enter'||event.key===' '||event.key==='Spacebar'){
+        event.preventDefault();
+        takeOver(demo);
+      }
+    });
+    tapOverlay.addEventListener('focus',function(){tapOverlay.classList.remove('is-faded');});
+  }
+  function hideTapOverlay(demo){
+    if(demo._tapOverlay){demo._tapOverlay.style.display='none';}
+  }
+  function freshTarget(demo){
+    var target=document.createElement('div');
+    target.className='video-player';
+    target.id='yt-demo-'+Math.random().toString(36).slice(2);
+    demo.appendChild(target);
+    demo._target=target;
+    return target;
+  }
+  function takeOver(demo){
+    if(demo._takenOver){return;}
+    demo._takenOver=true;
+    demo._shouldPlay=false;
+    clearClipTimer(demo);
+    hideTapOverlay(demo);
+    var startSeconds=videoStartOffset(demo);
+    if(demo._playerReady&&demo._player&&typeof demo._player.getCurrentTime==='function'){
+      try{
+        var current=demo._player.getCurrentTime();
+        if(typeof current==='number'&&isFinite(current)&&current>0){startSeconds=current;}
+      }catch(e){}
+    }
+    demo._pendingStart=startSeconds;
+    if(demo._player){
+      try{demo._player.destroy();}catch(e){}
+      demo._player=null;
+      demo._playerReady=false;
+      freshTarget(demo);
+    }
+    createPlayer(demo);
+  }
+  function showVideoFallback(demo){
+    if(!demo._placeholder){return;}
+    hideTapOverlay(demo);
+    demo.classList.remove('is-ready');
+    demo._placeholder.textContent='';
+    var link=document.createElement('a');
+    link.href=youtubeUrl(demo);
+    link.target='_blank';
+    link.rel='noopener noreferrer';
+    link.textContent='Watch '+demo.getAttribute('data-video-title')+' on YouTube';
+    demo._placeholder.appendChild(link);
+  }
+  function clearClipTimer(demo){
+    var timer=clipTimers.get(demo);
+    if(timer){window.clearTimeout(timer);clipTimers.delete(demo);}
+  }
+  function pauseDemo(demo){
+    clearClipTimer(demo);
+    demo._shouldPlay=false;
+    if(demo._playerReady&&demo._player&&typeof demo._player.pauseVideo==='function'){
+      try{demo._player.pauseVideo();}catch(e){}
+    }
+  }
+  function playDemo(demo){
+    if(demo._takenOver){return;}
+    clearClipTimer(demo);
+    demo._shouldPlay=true;
+    if(!demo._playerReady||!demo._player){return;}
+    try{
+      demo._player.mute();
+      demo._player.seekTo(videoStartOffset(demo),true);
+      demo._player.playVideo();
+      clipTimers.set(demo,window.setTimeout(function(){
+        clipTimers.delete(demo);
+        if(demo._playerReady&&demo._player){demo._player.pauseVideo();}
+      },9500));
+    }catch(e){}
+  }
+  function createPlayer(demo){
+    if(demo._player||youtubeApiFailed||!youtubeApiReady||!window.YT||!window.YT.Player){return;}
+    var takenOver=Boolean(demo._takenOver);
+    var playerVars=takenOver
+      ?{autoplay:1,controls:1,rel:0,playsinline:1,modestbranding:1,start:Math.max(0,Math.floor(demo._pendingStart!=null?demo._pendingStart:videoStartOffset(demo)))}
+      :{autoplay:0,mute:1,controls:0,rel:0,playsinline:1,modestbranding:1};
+    try{
+      demo._player=new window.YT.Player(demo._target.id,{
+        videoId:demo.getAttribute('data-video-id'),
+        playerVars:playerVars,
+        events:{
+          onReady:function(event){
+            demo._playerReady=true;
+            demo.classList.add('is-ready');
+            if(demo._takenOver){
+              try{event.target.unMute();event.target.setVolume(100);event.target.playVideo();}catch(e){}
+            }else{
+              try{event.target.mute();}catch(e){}
+              if(demo._shouldPlay){playDemo(demo);}
+            }
+          },
+          onError:function(){showVideoFallback(demo);}
+        }
+      });
+    }catch(e){showVideoFallback(demo);}
+  }
+
+  videoDemos.forEach(addPlaceholder);
+  var videoObserver=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      var demo=entry.target;
+      if(entry.isIntersecting&&!demo._player&&youtubeApiReady){createPlayer(demo);}
+      if(demo._takenOver){
+        if(!entry.isIntersecting){pauseDemo(demo);}
+        return;
+      }
+      if(entry.isIntersecting&&entry.intersectionRatio>=0.6){
+        demo._shouldPlay=true;
+        if(!demo._player&&youtubeApiReady){createPlayer(demo);}
+        playDemo(demo);
+      }else if(!entry.isIntersecting||entry.intersectionRatio<0.6){
+        pauseDemo(demo);
+      }
+    });
+  },{threshold:[0,0.6]});
+  videoDemos.forEach(function(demo){videoObserver.observe(demo);});
+
+  window.onYouTubeIframeAPIReady=function(){
+    youtubeApiReady=true;
+    videoDemos.forEach(function(demo){
+      var rect=demo.getBoundingClientRect();
+      if(rect.bottom>0&&rect.top<window.innerHeight){createPlayer(demo);}
+    });
+  };
+  var youtubeScript=document.createElement('script');
+  youtubeScript.src='https://www.youtube.com/iframe_api';
+  youtubeScript.async=true;
+  youtubeScript.onerror=function(){
+    youtubeApiFailed=true;
+    videoDemos.forEach(showVideoFallback);
+  };
+  document.head.appendChild(youtubeScript);
+  window.setTimeout(function(){
+    if(!youtubeApiReady&&!window.YT){
+      youtubeApiFailed=true;
+      videoDemos.forEach(showVideoFallback);
+    }
+  },12000);
+})();
+</script>
+</body></html>
