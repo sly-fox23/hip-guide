@@ -1,5 +1,5 @@
 /* Hip Mobility guide service worker — offline-first for the app shell. */
-const CACHE = 'hip-guide-v2';
+const CACHE = 'hip-guide-v3';
 const CORE = [
   './',
   './index.html',
