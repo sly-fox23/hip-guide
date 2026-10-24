@@ -84,6 +84,10 @@ nav.days a{min-height:44px;display:inline-flex;align-items:center;justify-conten
 .timer-primary{background:#0f766e;color:#fff}
 .timer-reset{background:#fff;color:#0f766e;border:1px solid #99d8d2}
 .timer-rep{width:100%;min-height:58px;font-size:20px}
+.timer-done-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:8px}
+.timer-done-row .timer-btn{min-height:52px}
+.timer-set-done{background:#0f766e;color:#fff}
+.timer-ex-done{background:#fff;color:#0f766e;border:1px solid #99d8d2}
 .timer-btn[disabled]{opacity:.62;cursor:default}
 @media(max-width:420px){
   .wrap{padding-left:12px;padding-right:12px}
@@ -148,10 +152,12 @@ nav.days a,.timer-primary{background:var(--accent-deep);color:#fff}
 .timer-readout{color:var(--accent)}
 .timer-status{color:var(--muted)}
 .timer-reset{background:var(--reset);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
+.timer-set-done{background:var(--accent-deep);color:#fff}
+.timer-ex-done{background:var(--reset);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 55%,transparent)}
 .safety{background:var(--safety);border-color:var(--safety-line)}
 footer{color:var(--muted)}
 html.light header.hero{background:#0f766e}
-@supports not (background:color-mix(in srgb,black,white)){nav.days{background:var(--page)}.timer-reset{border-color:var(--accent)}}
+@supports not (background:color-mix(in srgb,black,white)){nav.days{background:var(--page)}.timer-reset{border-color:var(--accent)}.timer-ex-done{border-color:var(--accent)}}
 /* Eight-week progression controls */
 .week-picker{display:flex;gap:7px;margin:2px 0 0;padding:2px 0 4px;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .week-picker::-webkit-scrollbar{display:none}
@@ -983,6 +989,19 @@ misalignment — if pain persists, see a physio. And if ED is new or persistent,
     widget.appendChild(status);
     return {widget:widget,setLabel:setLabel,status:status};
   }
+  function doneButtons(parts,title){
+    var row=document.createElement('div');
+    row.className='timer-done-row';
+    var setDone=document.createElement('button');
+    setDone.type='button';setDone.className='timer-btn timer-set-done';setDone.textContent='✓ Set done';
+    setDone.setAttribute('aria-label','Mark the current set of '+title+' done');
+    var exDone=document.createElement('button');
+    exDone.type='button';exDone.className='timer-btn timer-ex-done';exDone.textContent='✓ Exercise done';
+    exDone.setAttribute('aria-label','Mark '+title+' done');
+    row.appendChild(setDone);row.appendChild(exDone);
+    parts.widget.insertBefore(row,parts.status);
+    return {setDone:setDone,exDone:exDone};
+  }
   function addCountdown(cue,config,title){
     var parts=baseWidget(config);
     var readout=document.createElement('div');
@@ -998,6 +1017,7 @@ misalignment — if pain persists, see a physio. And if ED is new or persistent,
     parts.widget.insertBefore(readout,parts.status);
     parts.widget.appendChild(controls);
     cue.insertAdjacentElement('afterend',parts.widget);
+    var doneBtns=doneButtons(parts,title);
 
     var remaining=config.amount,currentSet=1,timerId=null,hasStarted=false,done=false,endAt=0;
     function render(){
@@ -1005,6 +1025,7 @@ misalignment — if pain persists, see a physio. And if ED is new or persistent,
       parts.setLabel.textContent=done?'Done':'Set '+currentSet+' of '+config.sets;
       main.textContent=done?'Done':timerId?'Pause':hasStarted?'Resume':'Start';
       main.disabled=done;
+      doneBtns.setDone.disabled=done;doneBtns.exDone.disabled=done;
       main.setAttribute('aria-label',main.textContent+' '+title+' timer');
     }
     function stopTimer(){
@@ -1058,6 +1079,15 @@ misalignment — if pain persists, see a physio. And if ED is new or persistent,
       stopTimer();remaining=config.amount;currentSet=1;hasStarted=false;done=false;endAt=0;
       parts.status.textContent='Ready';render();
     });
+    doneBtns.setDone.addEventListener('click',function(){
+      if(done){return;}
+      finishSet();
+    });
+    doneBtns.exDone.addEventListener('click',function(){
+      if(done){return;}
+      stopTimer();beep();done=true;hasStarted=false;remaining=0;
+      parts.status.textContent='Done';render();
+    });
     timerControllers.push({widget:parts.widget,pause:function(){pauseTimer(true);if(timerId===null&&hasStarted&&!done){parts.status.textContent='Paused — timer stopped when you left this day';}}});
     render();
   }
@@ -1076,12 +1106,14 @@ misalignment — if pain persists, see a physio. And if ED is new or persistent,
     controls.appendChild(spacer);controls.appendChild(reset);
     parts.widget.appendChild(controls);
     cue.insertAdjacentElement('afterend',parts.widget);
+    var doneBtns=doneButtons(parts,title);
 
     var count=0,currentSet=1,done=false;
     function render(){
       parts.setLabel.textContent=done?'Done':'Set '+currentSet+' of '+config.sets;
       tap.textContent=done?'Done':'Tap · '+count+' / '+config.amount;
       tap.disabled=done;
+      doneBtns.setDone.disabled=done;doneBtns.exDone.disabled=done;
       tap.setAttribute('aria-label',done?title+' complete':'Count '+title+' repetition '+(count+1)+' of '+config.amount);
     }
     tap.addEventListener('click',function(){
@@ -1097,9 +1129,27 @@ misalignment — if pain persists, see a physio. And if ED is new or persistent,
       }else{parts.status.textContent='Keep going';}
       render();
     });
+    doneBtns.setDone.addEventListener('click',function(){
+      if(done){return;}
+      ensureAudio();beep();
+      if(currentSet>=config.sets){
+        done=true;parts.status.textContent='Done';
+      }else{
+        parts.status.textContent='Set '+currentSet+' done · set '+(currentSet+1)+' ready';
+        currentSet+=1;count=0;
+      }
+      render();
+    });
+    doneBtns.exDone.addEventListener('click',function(){
+      if(done){return;}
+      ensureAudio();beep();
+      done=true;parts.status.textContent='Done';
+      render();
+    });
     reset.addEventListener('click',function(){
       count=0;currentSet=1;done=false;parts.status.textContent='Ready';render();
     });
+    parts.status.textContent='Tap per rep — or tap Set done when you finish the set';
     render();
   }
 
@@ -1123,6 +1173,7 @@ misalignment — if pain persists, see a physio. And if ED is new or persistent,
     controls.appendChild(spacer);controls.appendChild(reset);
     parts.widget.appendChild(controls);
     cue.insertAdjacentElement('afterend',parts.widget);
+    var doneBtns=doneButtons(parts,title);
 
     var count=0,currentSet=1,done=false,holdId=null,holdEndAt=0;
     function render(holdLeft){
@@ -1134,6 +1185,7 @@ misalignment — if pain persists, see a physio. And if ED is new or persistent,
       }else{
         tap.textContent=done?'Done':'Tap to start hold · '+count+' / '+config.amount;
         tap.disabled=done;
+        doneBtns.setDone.disabled=done;doneBtns.exDone.disabled=done;
         readout.textContent=formatTime(config.hold||5);
       }
       tap.setAttribute('aria-label',done?title+' complete':'Start '+(config.hold||5)+'-second hold for '+title+', repetition '+(count+1)+' of '+config.amount);
@@ -1167,6 +1219,28 @@ misalignment — if pain persists, see a physio. And if ED is new or persistent,
       activeTimerIds.push(holdId);
       holdTick();
     });
+    function cancelHold(){
+      if(holdId){window.clearInterval(holdId);activeTimerIds=activeTimerIds.filter(function(id){return id!==holdId;});holdId=null;}
+    }
+    doneBtns.setDone.addEventListener('click',function(){
+      if(done){return;}
+      cancelHold();
+      ensureAudio();beep();
+      if(currentSet>=config.sets){
+        done=true;parts.status.textContent='Done';
+      }else{
+        parts.status.textContent='Set '+currentSet+' done · set '+(currentSet+1)+' ready';
+        currentSet+=1;count=0;
+      }
+      render(config.hold||5);
+    });
+    doneBtns.exDone.addEventListener('click',function(){
+      if(done){return;}
+      cancelHold();
+      ensureAudio();beep();
+      done=true;parts.status.textContent='Done';
+      render(config.hold||5);
+    });
     reset.addEventListener('click',function(){
       if(holdId){window.clearInterval(holdId);activeTimerIds=activeTimerIds.filter(function(id){return id!==holdId;});holdId=null;}
       count=0;currentSet=1;done=false;parts.status.textContent='Ready';render(config.hold||5);
@@ -1174,6 +1248,7 @@ misalignment — if pain persists, see a physio. And if ED is new or persistent,
     timerControllers.push({widget:parts.widget,pause:function(){
       if(holdId){window.clearInterval(holdId);activeTimerIds=activeTimerIds.filter(function(id){return id!==holdId;});holdId=null;parts.status.textContent='Hold cancelled — you left this day';render(config.hold||5);}
     }});
+    parts.status.textContent='Tap to start each hold — or tap Set done when you finish the set';
     render(config.hold||5);
   }
 
